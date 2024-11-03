@@ -32,7 +32,7 @@ class ArtistResource extends Resource
                 Forms\Components\FileUpload::make('artist_avatar')->label("Avatar (1:1)")->preserveFilenames(),
                 Forms\Components\FileUpload::make('artist_idcard')->required()->preserveFilenames()->label("ID Card"),
                 Forms\Components\TextInput::make('email')->required()->label("Email")->email()->default(auth()->user()->email) // Set default email dari sesi pengguna
-                ,
+                ->readonly(fn () => auth()->user()->role === User::ROLE_ARTIST),
             ]);
     }
 

@@ -39,7 +39,7 @@ class ReleaseResource extends Resource
                 Forms\Components\FileUpload::make('image_file_path')->label('Artwork')->required()->preserveFilenames(),
                 Forms\Components\FileUpload::make('file_path')->label('Music')->required()->preserveFilenames(),
                 Forms\Components\TextInput::make('email')->required()->maxLength(255)->email()->default(auth()->user()->email) // Set default email dari sesi pengguna
-                ->disabled(fn () => auth()->user()->role === User::ROLE_ARTIST),
+                ->readonly(fn () => auth()->user()->role === User::ROLE_ARTIST),
             ]);
     }   
 
