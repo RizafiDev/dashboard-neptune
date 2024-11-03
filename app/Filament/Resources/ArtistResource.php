@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use App\Models\User;
 use App\Models\Release;
 use App\Models\Revenue;
+use Illuminate\Database\Eloquent\Builder;
 
 class ArtistResource extends Resource
 {
@@ -21,8 +22,6 @@ class ArtistResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
-    
-
     public static function form(Form $form): Form
     {
         return $form
@@ -31,7 +30,7 @@ class ArtistResource extends Resource
                 Forms\Components\TextInput::make('legal_name')->required()->label("Legal Name"),
                 Forms\Components\FileUpload::make('artist_avatar')->label("Avatar (1:1)")->preserveFilenames(),
                 Forms\Components\FileUpload::make('artist_idcard')->required()->preserveFilenames()->label("ID Card"),
-                Forms\Components\TextInput::make('email')->required()->label("Email")->email()->default(auth()->user()->email) // Set default email dari sesi pengguna
+                Forms\Components\TextInput::make('email')->required()->label("Email")->email()->default(auth()->user()->email)
                 ->readonly(fn () => auth()->user()->role === User::ROLE_ARTIST),
             ]);
     }
@@ -43,48 +42,66 @@ class ArtistResource extends Resource
                 Tables\Columns\TextColumn::make('id')->label("ID"),
                 Tables\Columns\TextColumn::make('created_at')->label("Since"),
                 Tables\Columns\TextColumn::make('artist_avatar')
-    ->formatStateUsing(fn ($state) => $state 
-        ? '<img src="' . url('storage/' . $state) . '" alt="Avatar" style="max-width: 50px; max-height: 50px; object-fit: cover;">'
-        : 'No image')
-    ->html()
-    ->label('Artist Avatar'),
+                    ->formatStateUsing(fn ($state) => $state 
+                        ? '<img src="' . url('storage/' . $state) . '" alt="Avatar" class="rounded-full" style="max-width: 50px; max-height: 50px; object-fit: cover;">'
+                        : 'No image')
+                    ->html()
+                    ->label('Artist Avatar'),
                 Tables\Columns\TextColumn::make('artist_name')->label('Artist Name'),
                 Tables\Columns\TextColumn::make('email')->label('Email'),
                 Tables\Columns\TextColumn::make('total_releases')
-    ->label("Total Releases")
-    ->getStateUsing(function ($record) {
-        // Hitung total rilis yang memiliki nama artist yang sama
-        return Release::where('artist_name', $record->artist_name)->count();
-    }),
-
- Tables\Columns\TextColumn::make('total_royalties')
-    ->label("Total Royalties")
-    ->getStateUsing(function ($record) {
-        // Hitung total revenue yang memiliki nama artist yang sama
-        $totalRevenue = Revenue::where('artist_name', $record->artist_name)->sum('revenue_amount');
-        return '$' . number_format($totalRevenue, 2);
-    }),
-
-
+                    ->label("Total Releases")
+                    ->getStateUsing(function ($record) {
+                        return Release::where('artist_name', $record->artist_name)->count();
+                    }),
+                Tables\Columns\TextColumn::make('total_royalties')
+                    ->label("Total Royalties")
+                    ->getStateUsing(function ($record) {
+                        $totalRevenue = Revenue::where('artist_name', $record->artist_name)->sum('revenue_amount');
+                        return '$' . number_format($totalRevenue, 2);
+                    }),
                 Tables\Columns\TextColumn::make('artist_idcard')
-                ->formatStateUsing(fn ($state) => $state 
-                    ? '<img src="' . url('storage/' . $state) . '" alt="ID Card" style="max-width: 50px; max-height: 50px; object-fit: cover;">'
-                    : 'No image')
-                ->html()
-                ->label('ID Card'),
+                    ->formatStateUsing(fn ($state) => $state 
+                        ? '<img src="' . url('storage/' . $state) . '" alt="ID Card" style="max-width: 50px; max-height: 50px; object-fit: cover;">'
+                        : 'No image')
+                    ->html()
+                    ->label('ID Card'),
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                // Jika user adalah admin atau editor, tampilkan semua data
+                if (in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])) {
+                    return $query;
+                }
+                
+                // Jika user adalah artist, hanya tampilkan data miliknya
+                return $query->where('email', auth()->user()->email);
+            })
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
+                Tables\Actions\DeleteAction::make()->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
                 ]),
             ]);
+    }
+
+    // Override getEloquentQuery untuk memastikan pembatasan akses di seluruh resource
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        // Jika user adalah admin atau editor, tampilkan semua data
+        if (in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])) {
+            return $query;
+        }
+        
+        // Jika user adalah artist, hanya tampilkan data miliknya
+        return $query->where('email', auth()->user()->email);
     }
 
     public static function getRelations(): array

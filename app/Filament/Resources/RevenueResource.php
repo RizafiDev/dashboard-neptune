@@ -21,6 +21,8 @@ class RevenueResource extends Resource
     protected static ?string $model = Revenue::class;
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
+    protected static ?int $sort = 2;
+
 
      // Method untuk mendapatkan widget
      public static function getWidgets(): array

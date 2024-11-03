@@ -15,10 +15,13 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
 use App\Models\Artist;
 use Filament\Tables\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReleaseResource extends Resource
 {
     protected static ?string $model = Release::class;
+
+    protected static ?int $sort = 1;
 
     protected static ?string $navigationIcon = 'heroicon-o-musical-note';
 
@@ -95,6 +98,15 @@ class ReleaseResource extends Resource
                 ->label('Create At'),
 
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                // Jika user adalah admin atau editor, tampilkan semua data
+                if (in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])) {
+                    return $query;
+                }
+                
+                // Jika user adalah artist, hanya tampilkan data miliknya
+                return $query->where('email', auth()->user()->email);
+            })
             ->filters([
                 SelectFilter::make('status')
     ->options([
@@ -197,6 +209,18 @@ class ReleaseResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        // Jika user adalah admin atau editor, tampilkan semua data
+        if (in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])) {
+            return $query;
+        }
+        
+        // Jika user adalah artist, hanya tampilkan data miliknya
+        return $query->where('email', auth()->user()->email);
+    }
 
     public static function getRelations(): array
     {
