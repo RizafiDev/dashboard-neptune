@@ -107,11 +107,11 @@ class ReleaseResource extends Resource
                 ->label('Create At'),
 
                 Tables\Columns\TextColumn::make('streams')
-    ->label('Streams')
-    ->getStateUsing(function ($record) {
-        $youtubeService = new YouTubeService();
-        return $youtubeService->getTrackViews($record->upc, $record->artist_name, $record->title);
-    }),
+                ->label('Streams')
+                ->getStateUsing(function ($record) {
+                  $youtubeService = new YouTubeService();
+                 return $youtubeService->getTrackViews($record->upc, $record->artist_name, $record->title);
+                }),
 
             
             ])
