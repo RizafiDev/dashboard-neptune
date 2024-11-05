@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('announcements', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->string("admin_name");
-            $table->string("subject");
-            $table->string("message");
-            $table->boolean('is_fixed')->default(false);
+        Schema::table('releases', function (Blueprint $table) {
+            $table->string("isrc")->nullable();
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('announcements');
+        Schema::table('releases', function (Blueprint $table) {
+            $table->dropColumn('isrc');
+        });
     }
 };

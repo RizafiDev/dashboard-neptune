@@ -29,6 +29,7 @@ class Release extends Model
 
     protected $table = 'releases'; 
     protected $fillable = [
+        'isrc',
         'upc',
         'title',
         'featuring',
@@ -39,5 +40,6 @@ class Release extends Model
         'artist_name',   // Nama artis
         'file_path',         // Path file musik
         'status',         // Path file musik
+        
     ];
 }

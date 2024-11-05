@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Announcement extends Model
 {
     use HasFactory;
     protected $table = 'announcements'; 
     protected $fillable = [
-        'artist_name',
-        'legal_name',
-        'artist_avatar',
-        'artist_idcard',
-        'total_royalties',
-        'total_releases',
-        'email',
+        'admin_name',
+        'subject',
+        'message',
+        'is_fixed',
     ];
 }

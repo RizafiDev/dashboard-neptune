@@ -16,6 +16,7 @@ use Filament\Tables\Filters\SelectFilter;
 use App\Models\Artist;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\SpotifyService;
 
 class ReleaseResource extends Resource
 {
@@ -31,6 +32,7 @@ class ReleaseResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('title')->label('Release Tittle')->required()->maxLength(255),
                 Forms\Components\TextInput::make('upc')->label('UPC')->maxLength(255)->nullable(),
+                Forms\Components\TextInput::make('isrc')->label('ISRC')->maxLength(255)->nullable(),
                  Forms\Components\Select::make('artist_name')
             ->label('Artist Name')
             ->options(Artist::pluck('artist_name', 'artist_name')->toArray())
@@ -39,10 +41,11 @@ class ReleaseResource extends Resource
                 Forms\Components\TextInput::make('featuring')->label('Artist Featuring') ->maxLength(255),
                 Forms\Components\Select::make('type')->label('Type')->options(Release::TYPE)->required(),
                 Forms\Components\Select::make('explicit')->label('Explicit')->options(Release::EXPLICIT)->required(),
-                Forms\Components\FileUpload::make('image_file_path')->label('Artwork')->required()->preserveFilenames(),
-                Forms\Components\FileUpload::make('file_path')->label('Music')->required()->preserveFilenames(),
                 Forms\Components\TextInput::make('email')->required()->maxLength(255)->email()->default(auth()->user()->email) // Set default email dari sesi pengguna
                 ->readonly(fn () => auth()->user()->role === User::ROLE_ARTIST),
+                Forms\Components\FileUpload::make('image_file_path')->label('Artwork (3000 X 3000)')->required()->preserveFilenames(),
+                Forms\Components\FileUpload::make('file_path')->label('Music (.WAV)')->required()->preserveFilenames(),
+                
             ]);
     }   
 
@@ -67,6 +70,7 @@ class ReleaseResource extends Resource
                     'danger' => 'Rejected',
                 ]),
                 Tables\Columns\TextColumn::make('upc')->label('UPC'),
+                Tables\Columns\TextColumn::make('isrc')->label('ISRC'),
                 Tables\Columns\TextColumn::make('artist_name')
                 ->label('Artist Name'),
                 Tables\Columns\TextColumn::make('title')->label('Release Tittle'),
@@ -96,6 +100,12 @@ class ReleaseResource extends Resource
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('created_at')
                 ->label('Create At'),
+                Tables\Columns\TextColumn::make('streams')
+                ->label('Streams')
+                ->getStateUsing(function ($record) {
+                    $spotifyService = new SpotifyService();
+                    return $spotifyService->getTrackStreamsByISRC($record->isrc);
+    }),
 
             ])
             ->modifyQueryUsing(function (Builder $query) {
@@ -114,6 +124,9 @@ class ReleaseResource extends Resource
         'approved' => 'Approved',
     ])
             ])
+
+            
+
             ->actions([
                 Action::make('approve')
                 ->label('Approve')
