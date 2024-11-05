@@ -17,6 +17,7 @@ use App\Models\Artist;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\SpotifyService;
+use App\Services\YouTubeService;
 
 class ReleaseResource extends Resource
 {
@@ -77,10 +78,14 @@ class ReleaseResource extends Resource
                 Tables\Columns\TextColumn::make('featuring')->label('Artist Featuring'),
                 Tables\Columns\TextColumn::make('image_file_path')
     ->formatStateUsing(fn ($state) => $state 
-        ? '<img src="' . url('storage/' . $state) . '" alt="Artwork" style="max-width: 50px; max-height: 50px; object-fit: cover;">'
+        ? '<a href="' . url('storage/' . $state) . '" download class="flex items-center justify-center gap-3 text-sm font-medium  font-inter">
+              <img src="' . url('storage/' . $state) . '" alt="Artwork" style="max-width: 50px; max-height: 50px; object-fit: cover;">
+              Download Artwork
+           </a>'
         : 'No image')
     ->html()
     ->label('Artwork'),
+
 
                 Tables\Columns\TextColumn::make('type')->label('Type'),
                 Tables\Columns\TextColumn::make('explicit')->label('Explicit'),
@@ -100,13 +105,15 @@ class ReleaseResource extends Resource
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('created_at')
                 ->label('Create At'),
+
                 Tables\Columns\TextColumn::make('streams')
-                ->label('Streams')
-                ->getStateUsing(function ($record) {
-                    $spotifyService = new SpotifyService();
-                    return $spotifyService->getTrackStreamsByISRC($record->isrc);
+    ->label('Streams')
+    ->getStateUsing(function ($record) {
+        $youtubeService = new YouTubeService();
+        return $youtubeService->getTrackViews($record->upc, $record->artist_name, $record->title);
     }),
 
+            
             ])
             ->modifyQueryUsing(function (Builder $query) {
                 // Jika user adalah admin atau editor, tampilkan semua data
@@ -133,12 +140,14 @@ class ReleaseResource extends Resource
                 ->action(fn ($record) => $record->update(['status' => 'approved']))
                 ->requiresConfirmation()
                 ->color('success')
+                ->icon("heroicon-o-check-circle")
                 ->visible(fn ($record) => $record->status !== 'approved')
                 ->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
 
             Action::make('reject')
                 ->label('Reject')
                 ->color('danger')
+                ->icon("heroicon-o-x-circle")
                 ->action(fn ($record) => $record->update(['status' => 'rejected']))
                 ->requiresConfirmation()
                 ->visible(fn ($record) => $record->status !== 'rejected')
