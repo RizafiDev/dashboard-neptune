@@ -10,6 +10,11 @@ use Filament\Support\Enums\IconPosition;
 class UserWidget extends BaseWidget
 {
 
+    public static function canView(): bool
+    {
+        return in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR]);
+    }
+
     protected static ?int $sort = 1;
     protected function getStats(): array
     {

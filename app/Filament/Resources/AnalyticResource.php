@@ -42,9 +42,11 @@ class AnalyticResource extends Resource
                 Tables\Columns\TextColumn::make('streams')
                 ->label('Streams')
                 ->getStateUsing(function ($record) {
-                  $youtubeService = new YouTubeService();
-                 return $youtubeService->getTrackViews($record->upc, $record->artist_name, $record->title);
-                }),
+                    $youtubeService = new YouTubeService();
+                    return $youtubeService->getTrackViews($record->artist_name, $record->title);
+                })
+                ->formatStateUsing(fn($state) => number_format($state)),
+            
             
             ])
             ->filters([
