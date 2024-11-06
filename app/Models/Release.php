@@ -40,6 +40,7 @@ class Release extends Model
         'artist_name',   // Nama artis
         'file_path',         // Path file musik
         'status',         // Path file musik
+        'youtube_stream',         // Path file musik
         
     ];
 }

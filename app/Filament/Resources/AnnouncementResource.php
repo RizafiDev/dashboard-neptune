@@ -69,11 +69,10 @@ class AnnouncementResource extends Resource
             ->actions([
                 Action::make('fixed')
                 ->color('success')
-                ->label('Fixed')
+                ->label('Fix')
                 ->icon("heroicon-o-check-circle")
                 ->action(function (Announcement $record) {
                     $record->update(['is_fixed' => true]); // Cek apakah ini berhasil
-                    $record->save(); // Tidak perlu save() jika update() berhasil
                     Notification::make()
                         ->title('Fixed.')
                         ->success()

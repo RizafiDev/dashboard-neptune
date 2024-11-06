@@ -14,6 +14,7 @@ use App\Models\Revenue;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\YouTubeService;
+use App\Filament\Widgets\StreamChart;
 
 class AnalyticResource extends Resource
 {
@@ -74,4 +75,5 @@ class AnalyticResource extends Resource
             'index' => Pages\ListAnalytics::route('/'),
         ];
     }
+
 }
