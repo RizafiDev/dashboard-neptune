@@ -21,6 +21,8 @@ use App\Services\YouTubeService;
 
 class ReleaseResource extends Resource
 {
+
+    
     protected static ?string $model = Release::class;
 
     protected static ?int $sort = 1;
@@ -105,15 +107,6 @@ class ReleaseResource extends Resource
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('created_at')
                 ->label('Create At'),
-
-                Tables\Columns\TextColumn::make('streams')
-                ->label('Streams')
-                ->getStateUsing(function ($record) {
-                  $youtubeService = new YouTubeService();
-                 return $youtubeService->getTrackViews($record->upc, $record->artist_name, $record->title);
-                }),
-
-            
             ])
             ->modifyQueryUsing(function (Builder $query) {
                 // Jika user adalah admin atau editor, tampilkan semua data

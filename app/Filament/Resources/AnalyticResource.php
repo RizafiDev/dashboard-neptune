@@ -15,6 +15,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\YouTubeService;
 use App\Filament\Widgets\StreamChart;
+use App\Services\SpotifyService;
 
 class AnalyticResource extends Resource
 {
@@ -41,13 +42,19 @@ class AnalyticResource extends Resource
                 ->label('Artist Name'),
                 Tables\Columns\TextColumn::make('title')->label('Release Tittle'),
                 Tables\Columns\TextColumn::make('streams')
-    ->label('Streams')
-    ->getStateUsing(function ($record) {
-        $youtubeService = new YouTubeService();
-        return $youtubeService->getTrackViews($record->artist_name, $record->title, $record->id);
-    })
-    ->formatStateUsing(fn($state) => number_format($state)),
-
+                ->label('Youtube Streams')
+                ->getStateUsing(function ($record) {
+                 $youtubeService = new YouTubeService();
+                return $youtubeService->getTrackViews($record->artist_name, $record->title, $record->id);
+                })
+                ->formatStateUsing(fn($state) => number_format($state)),
+                Tables\Columns\TextColumn::make('spotify_streams')
+                ->label('Spotify Streams')
+                ->getStateUsing(function ($record) {
+                $spotifyService = new SpotifyService();
+                return $spotifyService->getTrackStreamsByISRC($record->isrc);
+                })
+                ->formatStateUsing(fn($state) => $state ? number_format($state) : 'N/A'),
             
             
             ])
@@ -76,5 +83,12 @@ class AnalyticResource extends Resource
             'index' => Pages\ListAnalytics::route('/'),
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+{
+    // Ambil query dasar dan filter hanya record dengan status 'approved'
+    return parent::getEloquentQuery()->where('status', 'approved');
+}
+
 
 }
