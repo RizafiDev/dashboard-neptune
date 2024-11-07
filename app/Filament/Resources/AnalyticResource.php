@@ -41,12 +41,13 @@ class AnalyticResource extends Resource
                 ->label('Artist Name'),
                 Tables\Columns\TextColumn::make('title')->label('Release Tittle'),
                 Tables\Columns\TextColumn::make('streams')
-                ->label('Streams')
-                ->getStateUsing(function ($record) {
-                    $youtubeService = new YouTubeService();
-                    return $youtubeService->getTrackViews($record->artist_name, $record->title);
-                })
-                ->formatStateUsing(fn($state) => number_format($state)),
+    ->label('Streams')
+    ->getStateUsing(function ($record) {
+        $youtubeService = new YouTubeService();
+        return $youtubeService->getTrackViews($record->artist_name, $record->title, $record->id);
+    })
+    ->formatStateUsing(fn($state) => number_format($state)),
+
             
             
             ])
