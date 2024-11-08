@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Services\YouTubeService;
 use App\Filament\Widgets\StreamChart;
 use App\Services\SpotifyService;
+use App\Models\User;
 
 class AnalyticResource extends Resource
 {
@@ -87,8 +88,17 @@ class AnalyticResource extends Resource
     public static function getEloquentQuery(): Builder
 {
     // Ambil query dasar dan filter hanya record dengan status 'approved'
-    return parent::getEloquentQuery()->where('status', 'approved');
+    $query = parent::getEloquentQuery()->where('status', 'approved');
+    
+    // Jika user adalah admin atau editor, tampilkan semua data
+    if (in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])) {
+        return $query;
+    }
+    
+    // Jika user adalah artist, hanya tampilkan data miliknya berdasarkan email
+    return $query->where('email', auth()->user()->email);
 }
+
 
 
 }

@@ -68,19 +68,18 @@ class AnnouncementResource extends Resource
             ])
             ->actions([
                 Action::make('fixed')
-                ->color('success')
-                ->label('Fix')
-                ->icon("heroicon-o-check-circle")
-                ->action(function (Announcement $record) {
-                    $record->update(['is_fixed' => true]); // Cek apakah ini berhasil
-                    Notification::make()
-                        ->title('Fixed.')
-                        ->success()
-                        ->send();
-                })
-                ->requiresConfirmation()
-                ->visible(fn (Announcement $record) => !$record->is_fixed)
-                ->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
+                    ->color('success')
+                    ->label('Fix')
+                    ->icon("heroicon-o-check-circle")
+                    ->action(function (Announcement $record) {
+                        $record->update(['is_fixed' => true]);
+                        Notification::make()
+                            ->title('Fixed.')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->is_fixed !== true && in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
                 Tables\Actions\DeleteAction::make()->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
                 Tables\Actions\EditAction::make()->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
             ])

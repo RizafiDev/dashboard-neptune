@@ -18,6 +18,8 @@ class UserWidget extends BaseWidget
     protected static ?int $sort = 1;
     protected function getStats(): array
     {
+
+        
         return [
             Stat::make('Total Users', User::count() )
             ->description('Active artist users' )
