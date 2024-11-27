@@ -34,10 +34,10 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#7c3aed',
             ])
-            ->brandLogo(asset('images/neptune.png'))
-            ->brandLogoHeight('3rem')
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('2rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
