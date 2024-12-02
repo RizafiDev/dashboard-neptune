@@ -28,7 +28,7 @@ class ArtistResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('artist_name')->required()->label("Artist Name"),
                 Forms\Components\TextInput::make('legal_name')->required()->label("Legal Name"),
-                Forms\Components\FileUpload::make('artist_avatar')->label("Avatar (1:1)")->preserveFilenames(),
+                Forms\Components\FileUpload::make('artist_avatar')->label("Avatar (1:1)")->preserveFilenames()->required(),
                 Forms\Components\FileUpload::make('artist_idcard')->required()->preserveFilenames()->label("ID Card"),
                 Forms\Components\TextInput::make('email')->required()->label("Email")->email()->default(auth()->user()->email)
                 ->readonly(fn () => auth()->user()->role === User::ROLE_ARTIST),

@@ -46,7 +46,7 @@ class AnalyticResource extends Resource
                 ->label('Youtube Streams')
                 ->getStateUsing(function ($record) {
                  $youtubeService = new YouTubeService();
-                return $youtubeService->getTrackViews($record->artist_name, $record->title, $record->id);
+                return $youtubeService->getTrackViews($record->artist_name, $record->title,);
                 })
                 ->formatStateUsing(fn($state) => number_format($state)),
                 Tables\Columns\TextColumn::make('spotify_streams')

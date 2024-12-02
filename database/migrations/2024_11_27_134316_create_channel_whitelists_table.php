@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string("name");
             $table->string("artist_name");
             $table->string("channel");
-            $table->boolean("status");
+            $table->string("status")->default("review");
         });
     }
 

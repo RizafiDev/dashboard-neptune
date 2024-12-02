@@ -43,7 +43,7 @@ class ChannelWhitelistResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('ID'),
-                Tables\Columns\TextColumn::make('username')->label('Username'),
+                Tables\Columns\TextColumn::make('name')->label('Username'),
                 Tables\Columns\TextColumn::make('artist_name')->label('Artist Name'),
                 Tables\Columns\TextColumn::make('channel')->label('Youtube Channel Link'),
                 Tables\Columns\TextColumn::make('created_at')->label('Created At'),
@@ -73,8 +73,9 @@ class ChannelWhitelistResource extends Resource
                 ->requiresConfirmation()
                 ->color('success')
                 ->icon("heroicon-o-check-circle")
-                ->visible(fn ($record) => $record->status !== 'approved')
-                ->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
+                ->visible(fn ($record) => 
+    $record->status !== 'approved' &&
+    in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
 
             Action::make('reject')
                 ->label('Reject')
@@ -82,8 +83,10 @@ class ChannelWhitelistResource extends Resource
                 ->icon("heroicon-o-x-circle")
                 ->action(fn ($record) => $record->update(['status' => 'rejected']))
                 ->requiresConfirmation()
-                ->visible(fn ($record) => $record->status !== 'rejected')
-                ->visible(fn () => in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])),
+                ->visible(fn ($record) => 
+                $record->status !== 'rejected' &&
+                in_array(auth()->user()->role, [User::ROLE_ADMIN, User::ROLE_EDITOR])
+            ),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
 
